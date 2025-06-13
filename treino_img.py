@@ -6,31 +6,27 @@ from ultralytics import YOLO
 import matplotlib.pyplot as plt
 import pandas as pd
 
-# ========== CONFIGURAÇÕES ==========
-base_dir = '/home/greice/cow_detection'  # Ajuste aqui se precisar
+
+base_dir = '/home/nome_usuario/cow_detection'  
 xml_path = os.path.join(base_dir, 'annotations.xml')
 imagens_dir = os.path.join(base_dir, 'imagens')
-boxes_dir = os.path.join(base_dir, 'boxes')  # labels temporários antes de organizar
+boxes_dir = os.path.join(base_dir, 'boxes')  
 data_yaml_path = os.path.join(base_dir, 'data.yaml')
 
-# Divisão dos dados (pode ajustar as porcentagens)
 train_ratio = 0.7
 val_ratio = 0.15
 test_ratio = 0.15
-
-# Classes (ajuste conforme seus dados)
 classes = ['cow']
 
-# Nome do modelo YOLO (para salvar resultados)
 modelo_nome = 'cow_detector'
 modelo_path = os.path.join(base_dir, 'yolov8n.pt')
 
-# ======== FUNÇÃO PARA CONVERTER XML PARA YOLO =========
+
 def converter_xml_para_yolo():
     if not os.path.exists(boxes_dir):
         os.makedirs(boxes_dir)
     else:
-        # Se já existe, verificar se tem arquivos
+       
         if os.listdir(boxes_dir):
             print("Labels já convertidos encontrados, pulando conversão.")
             return
@@ -72,14 +68,13 @@ def converter_xml_para_yolo():
                 f.write(f"{class_id} {x_center:.6f} {y_center:.6f} {w:.6f} {h:.6f}\n")
     print("Conversão concluída.")
 
-# ======== FUNÇÃO PARA DIVIDIR OS DADOS E ORGANIZAR PASTAS =========
 def dividir_organizar_dados():
     # Criar pastas para treino, val, test
     for split in ['train', 'val', 'test']:
         os.makedirs(os.path.join(imagens_dir, split), exist_ok=True)
         os.makedirs(os.path.join(imagens_dir, split, 'labels'), exist_ok=True)
 
-    # Pegar lista de imagens com labels
+    
     imagens_com_label = []
     for label_file in os.listdir(boxes_dir):
         if not label_file.endswith('.txt'):
@@ -91,7 +86,6 @@ def dividir_organizar_dados():
 
     print(f"Total de imagens com labels: {len(imagens_com_label)}")
 
-    # Shuffle e dividir
     random.shuffle(imagens_com_label)
     n = len(imagens_com_label)
     n_train = int(n * train_ratio)
@@ -121,7 +115,6 @@ def dividir_organizar_dados():
 
     print(f"Imagens e labels movidos para pastas train ({len(train_imgs)}), val ({len(val_imgs)}) e test ({len(test_imgs)}).")
 
-# ======== FUNÇÃO PARA GERAR data.yaml =========
 def gerar_yaml():
     content = f"""train: {os.path.join(imagens_dir, 'train')}
 val: {os.path.join(imagens_dir, 'val')}
@@ -134,7 +127,6 @@ names: {classes}
         f.write(content)
     print(f"Arquivo data.yaml gerado em: {data_yaml_path}")
 
-# ======== TREINAR E AVALIAR MODELO =========
 def treinar_e_avalizar():
     print("Iniciando treinamento...")
     model = YOLO(modelo_path)
